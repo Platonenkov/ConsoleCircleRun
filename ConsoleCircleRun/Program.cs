@@ -13,8 +13,8 @@ namespace ConsoleCircleRun
     internal class Program
     {
         private static string Command;
-        private static string LogFile;
         private static bool RepeatWhenExit;
+        private static bool UseLogFile;
         private static bool UseConsole;
 
         public static async Task Main(string[] args)
@@ -26,7 +26,7 @@ namespace ConsoleCircleRun
             logger.AddLog4Net();
 
             var printer = new Printer();
-            if (!string.IsNullOrWhiteSpace(LogFile))
+            if (UseLogFile)
                 printer._Log = host.Services.GetService<ILogger<ProcessConsole>>();
             printer.UseConsole = UseConsole;
 
@@ -65,8 +65,8 @@ namespace ConsoleCircleRun
 
             var settings = host.Configuration.GetSection("Properties");
             Command = settings.GetValue<string>("Command");
-            LogFile = settings.GetValue<string>("LogFile");
             RepeatWhenExit = settings.GetValue<bool>("RepeatWhenExit");
+            UseLogFile = settings.GetValue<bool>("UseLogFile");
             UseConsole = settings.GetValue<bool>("UseConsole");
         }
 
