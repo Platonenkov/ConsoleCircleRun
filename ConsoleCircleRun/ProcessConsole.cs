@@ -10,11 +10,11 @@ namespace ConsoleCircleRun
 {
     public class ProcessConsole
     {
-        public ProcessConsole(string fileName, string arguments, ILogger Log)
+        public ProcessConsole(string fileName, string arguments, Printer printer)
         {
             _fileName = fileName;
             _arguments = arguments;
-            _Log = Log;
+            this.printer = printer;
         }
         public virtual void Start()
         {
@@ -42,6 +42,7 @@ namespace ConsoleCircleRun
             _process.WaitForExit();
         }
 
+        public bool WasCloseByUser;
         public virtual int ExitCode
         {
             get
@@ -59,7 +60,14 @@ namespace ConsoleCircleRun
                 _input.Flush();
                 keyInfo = Console.ReadKey(true);
                 _input.Write(keyInfo.KeyChar);
-                Console.WriteLine("Input :" + keyInfo.KeyChar);
+                if (keyInfo.Key == ConsoleKey.Q)
+                {
+                    _process.Close();
+                    WasCloseByUser = true;
+                    "Closing...".ConsoleYellow();
+                }
+                else
+                    $"Input : {keyInfo.KeyChar}, press Q to close".ConsoleYellow();
             }
         }
 
@@ -68,8 +76,7 @@ namespace ConsoleCircleRun
             if (String.IsNullOrEmpty(e.Data) == false)
             {
                 _output = e.Data;
-                //Console.WriteLine("Output : " + _output);
-                _Log.LogInformation(_output);
+                printer.Print(_output);
             }
         }
 
@@ -78,13 +85,13 @@ namespace ConsoleCircleRun
             if (String.IsNullOrEmpty(e.Data) == false)
             {
                 _error = (e.Data + Environment.NewLine);
-                //$"Error : {_error}".ConsoleRed();
-                _Log.LogError(_output);
+                printer.PrintError($"Error: {_output}");
             }
         }
 
         readonly string _fileName;
         readonly string _arguments;
+        private readonly Printer printer;
         private readonly ILogger _Log;
         private Process _process;
         private string _output;

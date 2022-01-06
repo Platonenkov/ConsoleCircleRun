@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using ConsoleCircleRun.Logger;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,35 +15,38 @@ namespace ConsoleCircleRun
         private static string Command;
         private static string LogFile;
         private static bool RepeatWhenExit;
+        private static bool UseConsole;
 
         public static async Task Main(string[] args)
         {
             var host = Hosting;
             await host.StartAsync().ConfigureAwait(false);
             var logger = host.Services.GetService<ILoggerFactory>();
+
             logger.AddLog4Net();
 
-            var log = host.Services.GetService<ILogger<ProcessConsole>>();
-            ProcessConsole process = new ProcessConsole("CMD.exe", $"/C {Command}",log);
-            process.Start();
-            process.WaitForExit();
+            var printer = new Printer();
+            if (!string.IsNullOrWhiteSpace(LogFile))
+                printer._Log = host.Services.GetService<ILogger<ProcessConsole>>();
+            printer.UseConsole = UseConsole;
 
+            printer.Print($"Start worker: {Command}");
+            if(RepeatWhenExit)
+                while (true)
+                {
+                    ProcessConsole process = new ProcessConsole("CMD.exe", $"/C {Command}", printer);
+                    process.Start();
+                    process.WaitForExit();
+                    if(process.WasCloseByUser)
+                        break;
+                }
+            else
+            {
+                ProcessConsole process = new ProcessConsole("CMD.exe", $"/C {Command}", printer);
+                process.Start();
+                process.WaitForExit();
+            }
 
-            //var process = new Process { StartInfo = new ProcessStartInfo("CMD.exe",$"/C {Command}") { UseShellExecute = true, RedirectStandardOutput = true } };
-            //process.OutputDataReceived += (Sender, Args) =>
-            //{
-            //    Console.WriteLine(Args.Data);
-            //};
-
-            //process.Start();
-            //process.BeginOutputReadLine();
-            //await process.WaitForExitAsync();
-
-
-            //Console.WriteLine($"Result: {result}");
-            //Console.WriteLine(Command??"No Command");
-            //Console.WriteLine(LogFile??$"Log file path: {LogFile}");
-            //Console.WriteLine(RepeatWhenExit);
             await host.StopAsync();
         }
 
@@ -57,11 +62,12 @@ namespace ConsoleCircleRun
         private static void ConfigureServices(HostBuilderContext host, IServiceCollection services)
         {
             services.AddLogging(sp => sp.SetMinimumLevel(LogLevel.Information));
-            
+
             var settings = host.Configuration.GetSection("Properties");
             Command = settings.GetValue<string>("Command");
             LogFile = settings.GetValue<string>("LogFile");
             RepeatWhenExit = settings.GetValue<bool>("RepeatWhenExit");
+            UseConsole = settings.GetValue<bool>("UseConsole");
         }
 
     }
