@@ -33,7 +33,7 @@ namespace ConsoleCircleRun
             _process.BeginOutputReadLine();
             _process.BeginErrorReadLine();
             _input = _process.StandardInput;
-            Thread thread = new Thread(InputThread) { IsBackground = true };
+            Thread thread = new Thread(InputThread) { IsBackground = false };
             thread.Start();
         }
 
