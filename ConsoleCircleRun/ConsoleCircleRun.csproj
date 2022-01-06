@@ -3,6 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <Version>0.1.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>This project will help you start process with reserve in console, with or without logger</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/Platonenkov/ConsoleCircleRun</PackageProjectUrl>
+    <Copyright>https://github.com/Platonenkov</Copyright>
+    <Authors>Platonenkov</Authors>
+    <Company>https://github.com/Platonenkov</Company>
+    <RepositoryUrl>https://github.com/Platonenkov/ConsoleCircleRun</RepositoryUrl>
+    <PackageTags>Console Circle Run</PackageTags>
+    <PackageReleaseNotes>
+      add settings;
+    </PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
